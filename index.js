@@ -11,100 +11,108 @@ async function simulateSwap(
   swapCallData,
   recipient = mockedAllowanceTarget
 ) {
-  web3.eth.extend({
-    methods: [
+  try {
+    web3.eth.extend({
+      methods: [
+        {
+          name: "callWithState",
+          call: "eth_call",
+          params: 3,
+        },
+      ],
+    });
+
+    const calls = [
       {
-        name: "callWithState",
-        call: "eth_call",
-        params: 3,
+        target: inToken,
+        callData: web3.eth.abi.encodeFunctionCall(
+          {
+            name: "transferFrom",
+            type: "function",
+            inputs: [
+              {
+                type: "address",
+                name: "sender",
+              },
+              {
+                type: "address",
+                name: "recipient",
+              },
+              {
+                type: "uint256",
+                name: "amount",
+              },
+            ],
+          },
+          [userAddress, mockedAllowanceTarget, inAmount]
+        ),
       },
-    ],
-  });
+      {
+        target: inToken,
+        callData: web3.eth.abi.encodeFunctionCall(
+          {
+            name: "approve",
+            type: "function",
+            inputs: [
+              {
+                type: "address",
+                name: "spender",
+              },
+              {
+                type: "uint256",
+                name: "amount",
+              },
+            ],
+          },
+          [swapTarget, inAmount]
+        ),
+      },
+      {
+        target: swapTarget,
+        callData: swapCallData,
+      },
+      {
+        target: outToken,
+        callData: web3.eth.abi.encodeFunctionCall(
+          {
+            name: "balanceOf",
+            type: "function",
+            inputs: [
+              {
+                type: "address",
+                name: "account",
+              },
+            ],
+          },
+          [recipient]
+        ),
+      },
+    ];
 
-  const calls = [
-    {
-      target: inToken,
-      callData: web3.eth.abi.encodeFunctionCall(
-        {
-          name: "transferFrom",
-          type: "function",
-          inputs: [
-            {
-              type: "address",
-              name: "sender",
-            },
-            {
-              type: "address",
-              name: "recipient",
-            },
-            {
-              type: "uint256",
-              name: "amount",
-            },
-          ],
-        },
-        [userAddress, mockedAllowanceTarget, inAmount]
-      ),
-    },
-    {
-      target: inToken,
-      callData: web3.eth.abi.encodeFunctionCall(
-        {
-          name: "approve",
-          type: "function",
-          inputs: [
-            {
-              type: "address",
-              name: "spender",
-            },
-            {
-              type: "uint256",
-              name: "amount",
-            },
-          ],
-        },
-        [swapTarget, inAmount]
-      ),
-    },
-    {
-      target: swapTarget,
-      callData: swapCallData,
-    },
-    {
-      target: outToken,
-      callData: web3.eth.abi.encodeFunctionCall(
-        {
-          name: "balanceOf",
-          type: "function",
-          inputs: [
-            {
-              type: "address",
-              name: "account",
-            },
-          ],
-        },
-        [recipient]
-      ),
-    },
-  ];
+    const callParams = {
+      to: mockedAllowanceTarget,
+      data: web3.eth.abi.encodeFunctionCall(multicallAggregateAbi, [calls]),
+    };
 
-  const callParams = {
-    to: mockedAllowanceTarget,
-    data: web3.eth.abi.encodeFunctionCall(multicallAggregateAbi, [calls]),
-  };
+    const result = await web3.eth.callWithState(callParams, "latest", {
+      [mockedAllowanceTarget]: {
+        code: multicallBytecode,
+      },
+    });
 
-  const result = await web3.eth.callWithState(callParams, "latest", {
-    [mockedAllowanceTarget]: {
-      code: multicallBytecode,
-    },
-  });
-
-  return web3.eth.abi.decodeParameters(
-    [{ name: "outBalance", type: "uint256" }],
-    web3.eth.abi.decodeParameters(multicallAggregateAbi.outputs, result)[1][
-      calls.length - 1
-    ]
-  )[0];
+    return {
+      success: true,
+      outAmount: web3.eth.abi.decodeParameters(
+        [{ name: "outBalance", type: "uint256" }],
+        web3.eth.abi.decodeParameters(multicallAggregateAbi.outputs, result)[1][
+          calls.length - 1
+        ]
+      )[0],
+      gasCost: 0,
+    };
+  } catch (e) {
+    return { success: false, error: e.message, outAmount: 0, gasCost: 0 };
+  }
 }
 
 const multicallAggregateAbi = {
