@@ -8,7 +8,8 @@ async function simulateSwap(
   outToken,
   inAmount,
   swapTarget,
-  swapCallData
+  swapCallData,
+  recipient = mockedAllowanceTarget
 ) {
   web3.eth.extend({
     methods: [
@@ -82,7 +83,7 @@ async function simulateSwap(
             },
           ],
         },
-        [mockedAllowanceTarget]
+        [recipient]
       ),
     },
   ];
