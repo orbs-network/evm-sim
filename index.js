@@ -136,7 +136,7 @@ async function simulateSwap(params) {
       gasCost: 0,
     };
   } catch (e) {
-    return { success: false, error: e.message, outAmount: 0, gasCost: 0 };
+    return { success: false, error: e.message, outAmount: "0", gasCost: "0" };
   }
 }
 
