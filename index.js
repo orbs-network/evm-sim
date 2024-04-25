@@ -8,6 +8,7 @@ async function simulateSwap(
   outToken,
   inAmount,
   swapTarget,
+  swapApprovalTarget=swapTarget,
   swapCallData,
   recipient = mockedAllowanceTarget
 ) {
@@ -64,7 +65,7 @@ async function simulateSwap(
               },
             ],
           },
-          [swapTarget, inAmount]
+          [swapApprovalTarget, inAmount]
         ),
       },
       {
