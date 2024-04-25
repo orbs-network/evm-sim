@@ -1,7 +1,7 @@
 module.exports = { simulateSwap };
 
 /**
- * @param {{ web3: any; userAddress: string; mockedAllowanceTarget: string; inToken: string; outToken: string; inAmount: string; swapTarget: string; swapApprovalTarget: string; swapCallData: string; recipient: string; isNativeOutput: boolean; }} params
+ * @param {{ web3: any; userAddress: string; mockedAllowanceTarget: string; inToken: string; outToken: string; inAmount: string; swapTarget: string; swapApprovalTarget: string; swapCallData: string; recipient: string; }} params
  */
 async function simulateSwap(params) {
   let {
@@ -15,11 +15,9 @@ async function simulateSwap(params) {
     swapApprovalTarget,
     swapCallData,
     recipient,
-    isNativeOutput,
   } = params;
   swapApprovalTarget = swapApprovalTarget || swapTarget;
   recipient = recipient || mockedAllowanceTarget;
-  isNativeOutput = isNativeOutput || false;
 
   try {
     web3.eth.extend({
@@ -81,7 +79,7 @@ async function simulateSwap(params) {
         target: swapTarget,
         callData: swapCallData,
       },
-      isNativeOutput
+      isNativeAddress(outToken)
         ? {
             target: mockedAllowanceTarget,
             callData: web3.eth.abi.encodeFunctionCall(
@@ -141,6 +139,19 @@ async function simulateSwap(params) {
     return { success: false, error: e.message, outAmount: 0, gasCost: 0 };
   }
 }
+
+const nativeTokenAddresses = [
+  "0x0000000000000000000000000000000000000000",
+  "0x0000000000000000000000000000000000001010",
+  "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+  "0x000000000000000000000000000000000000dEaD",
+  "0x000000000000000000000000000000000000800A",
+];
+
+const isNativeAddress = (address) =>
+  !!nativeTokenAddresses.find(
+    (a) => a == address || a.toLowerCase() === address.toLowerCase()
+  );
 
 const multicallAggregateAbi = {
   constant: false,
