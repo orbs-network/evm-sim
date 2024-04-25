@@ -1,17 +1,26 @@
 module.exports = { simulateSwap };
 
-async function simulateSwap(
-  web3,
-  userAddress,
-  mockedAllowanceTarget,
-  inToken,
-  outToken,
-  inAmount,
-  swapTarget,
-  swapApprovalTarget=swapTarget,
-  swapCallData,
-  recipient = mockedAllowanceTarget
-) {
+/**
+ * @param {{ web3: any; userAddress: string; mockedAllowanceTarget: string; inToken: string; outToken: string; inAmount: string; swapTarget: string; swapApprovalTarget: string; swapCallData: string; recipient: string; isNativeOutput: boolean; }} params
+ */
+async function simulateSwap(params) {
+  let {
+    web3,
+    userAddress,
+    mockedAllowanceTarget,
+    inToken,
+    outToken,
+    inAmount,
+    swapTarget,
+    swapApprovalTarget,
+    swapCallData,
+    recipient,
+    isNativeOutput,
+  } = params;
+  swapApprovalTarget = swapApprovalTarget || swapTarget;
+  recipient = recipient || mockedAllowanceTarget;
+  isNativeOutput = isNativeOutput || false;
+
   try {
     web3.eth.extend({
       methods: [
@@ -72,22 +81,39 @@ async function simulateSwap(
         target: swapTarget,
         callData: swapCallData,
       },
-      {
-        target: outToken,
-        callData: web3.eth.abi.encodeFunctionCall(
-          {
-            name: "balanceOf",
-            type: "function",
-            inputs: [
+      isNativeOutput
+        ? {
+            target: mockedAllowanceTarget,
+            callData: web3.eth.abi.encodeFunctionCall(
               {
-                type: "address",
-                name: "account",
+                name: "getEthBalance",
+                type: "function",
+                inputs: [
+                  {
+                    type: "address",
+                    name: "account",
+                  },
+                ],
               },
-            ],
+              [recipient]
+            ),
+          }
+        : {
+            target: outToken,
+            callData: web3.eth.abi.encodeFunctionCall(
+              {
+                name: "balanceOf",
+                type: "function",
+                inputs: [
+                  {
+                    type: "address",
+                    name: "account",
+                  },
+                ],
+              },
+              [recipient]
+            ),
           },
-          [recipient]
-        ),
-      },
     ];
 
     const callParams = {
