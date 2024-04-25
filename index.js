@@ -1,13 +1,12 @@
 module.exports = { simulateSwap };
 
 /**
- * @param {{ web3: any; userAddress: string; mockedAllowanceTarget: string; inToken: string; outToken: string; inAmount: string; swapTarget: string; swapApprovalTarget: string; swapCallData: string; recipient: string; }} params
+ * @param {{ web3: any; userAddress: string; inToken: string; outToken: string; inAmount: string; swapTarget: string; swapApprovalTarget: string; swapCallData: string; recipient: string; }} params
  */
 async function simulateSwap(params) {
   let {
     web3,
     userAddress,
-    mockedAllowanceTarget,
     inToken,
     outToken,
     inAmount,
@@ -17,7 +16,7 @@ async function simulateSwap(params) {
     recipient,
   } = params;
   swapApprovalTarget = swapApprovalTarget || swapTarget;
-  recipient = recipient || mockedAllowanceTarget;
+  recipient = recipient || userAddress;
 
   try {
     web3.eth.extend({
@@ -30,31 +29,42 @@ async function simulateSwap(params) {
       ],
     });
 
+    const balanceOfOutput = isNativeAddress(outToken)
+      ? {
+          target: userAddress,
+          callData: web3.eth.abi.encodeFunctionCall(
+            {
+              name: "getEthBalance",
+              type: "function",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                },
+              ],
+            },
+            [recipient]
+          ),
+        }
+      : {
+          target: outToken,
+          callData: web3.eth.abi.encodeFunctionCall(
+            {
+              name: "balanceOf",
+              type: "function",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                },
+              ],
+            },
+            [recipient]
+          ),
+        };
+
     const calls = [
-      {
-        target: inToken,
-        callData: web3.eth.abi.encodeFunctionCall(
-          {
-            name: "transferFrom",
-            type: "function",
-            inputs: [
-              {
-                type: "address",
-                name: "sender",
-              },
-              {
-                type: "address",
-                name: "recipient",
-              },
-              {
-                type: "uint256",
-                name: "amount",
-              },
-            ],
-          },
-          [userAddress, mockedAllowanceTarget, inAmount]
-        ),
-      },
+      balanceOfOutput,
       {
         target: inToken,
         callData: web3.eth.abi.encodeFunctionCall(
@@ -79,61 +89,42 @@ async function simulateSwap(params) {
         target: swapTarget,
         callData: swapCallData,
       },
-      isNativeAddress(outToken)
-        ? {
-            target: mockedAllowanceTarget,
-            callData: web3.eth.abi.encodeFunctionCall(
-              {
-                name: "getEthBalance",
-                type: "function",
-                inputs: [
-                  {
-                    type: "address",
-                    name: "account",
-                  },
-                ],
-              },
-              [recipient]
-            ),
-          }
-        : {
-            target: outToken,
-            callData: web3.eth.abi.encodeFunctionCall(
-              {
-                name: "balanceOf",
-                type: "function",
-                inputs: [
-                  {
-                    type: "address",
-                    name: "account",
-                  },
-                ],
-              },
-              [recipient]
-            ),
-          },
+      balanceOfOutput,
     ];
 
     const callParams = {
-      to: mockedAllowanceTarget,
+      to: userAddress,
       data: web3.eth.abi.encodeFunctionCall(multicallAggregateAbi, [calls]),
     };
 
     const result = await web3.eth.callWithState(callParams, "latest", {
-      [mockedAllowanceTarget]: {
+      [userAddress]: {
         code: multicallBytecode,
       },
     });
 
+    const results = web3.eth.abi.decodeParameters(
+      multicallAggregateAbi.outputs,
+      result
+    )[1];
+
+    const startBalance = web3.eth.abi.decodeParameters(
+      [{ name: "outBalance", type: "uint256" }],
+      results[0]
+    )[0];
+
+    const endBalance = web3.eth.abi.decodeParameters(
+      [{ name: "outBalance", type: "uint256" }],
+      results[calls.length - 1]
+    )[0];
+
+    const outAmount = BigInt(endBalance) - BigInt(startBalance);
+    if (outAmount <= 0) throw new Error("invalid output amount");
+
     return {
       success: true,
-      outAmount: web3.eth.abi.decodeParameters(
-        [{ name: "outBalance", type: "uint256" }],
-        web3.eth.abi.decodeParameters(multicallAggregateAbi.outputs, result)[1][
-          calls.length - 1
-        ]
-      )[0],
-      gasCost: 0,
+      outAmount: outAmount.toString(),
+      gasCost: "0",
     };
   } catch (e) {
     return { success: false, error: e.message, outAmount: "0", gasCost: "0" };
