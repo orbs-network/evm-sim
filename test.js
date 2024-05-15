@@ -1,10 +1,13 @@
 const {simulateSwap}=require('./index');
 const Web3 = require('web3');
 
-// arb 210540643
+// arb blocknumber 210540643
+const web3 = new Web3(process.env.RPC_URL || "");
+const userAddress = process.env.HW2 || "";
 
-simulateSwap({web3:new Web3(process.env.RPC_URL), 
-	userAddress:process.env.HW2,
+simulateSwap({
+    web3, 
+	userAddress,
     inToken:"0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
     outToken:"0x912CE59144191C1204E64559FE8253a0e49E6548",
     inAmount:"50000000000000000000",
@@ -14,8 +17,9 @@ simulateSwap({web3:new Web3(process.env.RPC_URL),
     recipient:"",}
 	).then(console.log).catch(console.error);
 
-simulateSwap({web3:new Web3(process.env.RPC_URL), 
-	userAddress:process.env.HW2,
+simulateSwap({
+    web3, 
+	userAddress,
     inToken:"0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
     outToken:"0x0000000000000000000000000000000000000000",
     inAmount:"50000000000000000000",

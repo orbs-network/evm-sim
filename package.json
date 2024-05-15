@@ -1,14 +1,12 @@
 {
-  "name": "tx-simulator",
+  "name": "@orbs-network/tx-simulator",
   "version": "1.0.8",
-  "description": "",
+  "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "test": ""
+    "test": "node test.js"
   },
-  "author": "zlotindaniel@gmail.com",
-  "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "web3": "1.x"
   }
 }
