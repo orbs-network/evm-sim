@@ -4,6 +4,7 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
+    "build": "forge build && cat out/MultiSpy.sol/MultiSpy.json | jq '.deployedBytecode.object' | xargs -I{} sed -i '' 's@const MULTISPY_BYTECODE = .*@const MULTISPY_BYTECODE = \"{}\";@' index.js",
     "test": "node test.js"
   },
   "peerDependencies": {
