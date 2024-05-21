@@ -1,14 +1,20 @@
 {
   "name": "@orbs-network/tx-simulator",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "license": "MIT",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "forge build && cat out/MultiSpy.sol/MultiSpy.json | jq '.deployedBytecode.object' | xargs -I{} sed -i '' 's@const MULTISPY_BYTECODE = .*@const MULTISPY_BYTECODE = \"{}\";@' index.js",
-    "test": "node test.js"
+    "build": "./build",
+    "test": "npm run build && node test/test.js"
   },
   "peerDependencies": {
     "web3": "1.x"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "latest"
   },
   "prettier": {
     "printWidth": 120

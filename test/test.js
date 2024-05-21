@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const { simulateSwap } = require("./index");
+const { simulateSwap } = require("../dist/index");
+
 const Web3 = require("web3");
 const { spawn } = require("child_process");
 
