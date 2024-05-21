@@ -238,7 +238,11 @@ contract MultiSpy {
     fallback() external payable {}
 
     function transferAll(address token, address recipient) public {
-        IERC20(token).transfer(recipient, IERC20(token).balanceOf(address(this)));
+        if (token == address(0)) {
+            payable(recipient).transfer(address(this).balance);
+        } else {
+            IERC20(token).transfer(recipient, IERC20(token).balanceOf(address(this)));
+        }
     }
 }
 
