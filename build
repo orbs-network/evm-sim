@@ -3,7 +3,14 @@
 set -euo pipefail
 
 forge build
+
 cat out/MultiSpy.sol/MultiSpy.json \
-	| jq '.deployedBytecode.object' \
-	| xargs -I{} sed -i '' 's@const MULTISPY_BYTECODE = .*@const MULTISPY_BYTECODE = \"{}\";@' src/index.js
+  | jq '.deployedBytecode.object' \
+  | xargs -I{} sed -i '' 's@const MULTISPY_BYTECODE = .*@const MULTISPY_BYTECODE = \"{}\";@' src/index.js
+
+cat out/MultiSpy.sol/MultiSpy.json \
+  | jq -c '.abi[] | select(.name == "aggregate3Value") | @json' \
+  | parallel sed "-i '' 's@const MULTISPY_ABI = .*@const MULTISPY_ABI = {};@' src/index.js"
+
 npx javascript-obfuscator src/index.js --output dist/index.js
+
