@@ -6,7 +6,7 @@ forge build
 
 cat out/MultiSpy.sol/MultiSpy.json \
   | jq '.deployedBytecode.object' \
-  | xargs -I{} sed -i '' 's@const MULTISPY_BYTECODE = .*@const MULTISPY_BYTECODE = \"{}\";@' src/index.js
+  | parallel sed "-i '' 's@const MULTISPY_BYTECODE = .*@const MULTISPY_BYTECODE = \"{}\";@' src/index.js"
 
 cat out/MultiSpy.sol/MultiSpy.json \
   | jq -c '.abi[] | select(.name == "aggregate3Value") | @json' \

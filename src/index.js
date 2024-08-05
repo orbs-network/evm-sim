@@ -37,7 +37,7 @@ async function simulateSwap(params) {
       calls.push(transferAll(web3, userAddress, inToken, userAddress));
     }
 
-    calls.push({ target: swapTarget, callData: swapCallData });
+    calls.push({ target: swapTarget, callData: swapCallData, value: 0, allowFailure: false });
 
     for (let i = 0; i < extraTransfers; i++) {
       calls.push(transferAll(web3, recipient, outToken, recipient));
@@ -73,6 +73,8 @@ async function simulateSwap(params) {
 }
 
 const approve = (web3, token, spender, amount) => ({
+  value: 0,
+  allowFailure: false,
   target: token,
   callData: web3.eth.abi.encodeFunctionCall(
     {
@@ -94,6 +96,8 @@ const approve = (web3, token, spender, amount) => ({
 });
 
 const transferAll = (web3, sender, token, recipient) => ({
+  value: 0,
+  allowFailure: false,
   target: sender,
   callData: web3.eth.abi.encodeFunctionCall(
     {
@@ -117,6 +121,8 @@ const transferAll = (web3, sender, token, recipient) => ({
 const balanceOf = (web3, token, target) =>
   isNativeAddress(token)
     ? {
+        value: 0,
+        allowFailure: false,
         target: mc,
         callData: web3.eth.abi.encodeFunctionCall(
           {
@@ -133,6 +139,8 @@ const balanceOf = (web3, token, target) =>
         ),
       }
     : {
+        value: 0,
+        allowFailure: false,
         target: token,
         callData: web3.eth.abi.encodeFunctionCall(
           {
