@@ -57,18 +57,17 @@ async function simulateSwap(params) {
         [recipient]: { code: MULTISPY_BYTECODE },
       }
     );
-    const results = web3.eth.abi.decodeParameters(MULTISPY_ABI.outputs, result);
+    const results = web3.eth.abi.decodeParameters(MULTISPY_ABI.outputs, result).returnData;
 
-    console.log(results.map(r => r.gasCost));
-
-    const startBalance = web3.eth.abi.decodeParameter("uint256", results[0]);
-    const endBalance = web3.eth.abi.decodeParameter("uint256", results[calls.length - 1]);
+    const gasCost = results.reduce((acc, r) => acc + BigInt(r.gasCost), BigInt(0));
+    const startBalance = web3.eth.abi.decodeParameter("uint256", results[0].returnData);
+    const endBalance = web3.eth.abi.decodeParameter("uint256", results[calls.length - 1].returnData);
     const outAmount = BigInt(endBalance) - BigInt(startBalance);
     if (outAmount <= 0) throw new Error("invalid output amount");
 
-    return { success: true, outAmount: outAmount.toString(), gasCost: "0" };
+    return { success: true, outAmount: outAmount.toString(), gasCost: gasCost.toString() };
   } catch (e) {
-    return { success: false, error: e.message, outAmount: "0", gasCost: "0" };
+    return { success: false, error: e.message, outAmount: "0", gasCost: gasCost.toString() };
   }
 }
 
