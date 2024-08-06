@@ -59,15 +59,16 @@ async function simulateSwap(params) {
     );
     const results = web3.eth.abi.decodeParameters(MULTISPY_ABI.outputs, result).returnData;
 
-    const gasCost = results.reduce((acc, r) => acc + BigInt(r.gasCost), BigInt(0));
+    const swapIndex = 2 + extraTransfers;
+    const gasCost = BigInt(results[swapIndex].gasCost); //results.reduce((acc, r) => acc + BigInt(r.gasCost), BigInt(0));
     const startBalance = web3.eth.abi.decodeParameter("uint256", results[0].returnData);
     const endBalance = web3.eth.abi.decodeParameter("uint256", results[calls.length - 1].returnData);
     const outAmount = BigInt(endBalance) - BigInt(startBalance);
     if (outAmount <= 0) throw new Error("invalid output amount");
 
-    return { success: true, outAmount: outAmount.toString(), gasCost: gasCost.toString() };
+    return { success: true, outAmount: outAmount.toString(), gasCost: gasCost.toString(), raw: results };
   } catch (e) {
-    return { success: false, error: e.message, outAmount: "0", gasCost: gasCost.toString() };
+    return { success: false, error: e.message, outAmount: "0", gasCost: gasCost.toString(), raw: results };
   }
 }
 
