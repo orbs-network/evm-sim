@@ -15,6 +15,7 @@ async function simulateSwap(params) {
     swapCallData,
     recipient,
     extraTransfers,
+    blockNumber
   } = params;
   swapApprovalTarget = swapApprovalTarget || swapTarget;
   recipient = recipient || userAddress;
@@ -50,7 +51,7 @@ async function simulateSwap(params) {
         to: userAddress,
         data: web3.eth.abi.encodeFunctionCall(MULTISPY_ABI, [calls]),
       },
-      "latest",
+      blockNumber || "latest",
       {
         [mc]: { code: MULTISPY_BYTECODE },
         [userAddress]: { code: MULTISPY_BYTECODE },
@@ -59,8 +60,7 @@ async function simulateSwap(params) {
     );
     const results = web3.eth.abi.decodeParameters(MULTISPY_ABI.outputs, result).returnData;
 
-    const swapIndex = 2 + extraTransfers;
-    const gasCost = BigInt(results[swapIndex].gasCost); //results.reduce((acc, r) => acc + BigInt(r.gasCost), BigInt(0));
+    const gasCost = results.reduce((acc, r) => acc + BigInt(r?.gasCost || 0), BigInt(0));
     const startBalance = web3.eth.abi.decodeParameter("uint256", results[0].returnData);
     const endBalance = web3.eth.abi.decodeParameter("uint256", results[calls.length - 1].returnData);
     const outAmount = BigInt(endBalance) - BigInt(startBalance);
@@ -68,7 +68,7 @@ async function simulateSwap(params) {
 
     return { success: true, outAmount: outAmount.toString(), gasCost: gasCost.toString(), raw: results };
   } catch (e) {
-    return { success: false, error: e.message, outAmount: "0", gasCost: gasCost.toString(), raw: results };
+    return { success: false, error: e.message, outAmount: "0", gasCost: "0", raw: "" };
   }
 }
 
