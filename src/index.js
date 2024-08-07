@@ -51,7 +51,7 @@ async function simulateSwap(params) {
         to: userAddress,
         data: web3.eth.abi.encodeFunctionCall(MULTISPY_ABI, [calls]),
       },
-      blockNumber || "latest",
+      blockNumber ? web3.eth.abi.encodeParameter("uint256", blockNumber) : "latest",
       {
         [mc]: { code: MULTISPY_BYTECODE },
         [userAddress]: { code: MULTISPY_BYTECODE },
