@@ -22,6 +22,16 @@ async function simulateSwap(params) {
   extraTransfers = extraTransfers || 0;
 
   try {
+    if (!web3) throw new Error("missing web3")
+    if (!userAddress) throw new Error("missing userAddress")
+    if (!inToken) throw new Error("missing inToken")
+    if (!outToken) throw new Error("missing outToken")
+    if (!inAmount) throw new Error("missing inAmount")
+    if (!swapTarget) throw new Error("missing swapTarget")
+    if (!swapApprovalTarget) throw new Error("missing swapApprovalTarget")
+    if (!swapCallData) throw new Error("missing swapCallData")
+    if (!recipient) throw new Error("missing recipient")
+
     web3.eth.extend({
       methods: [
         {
