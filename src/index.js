@@ -179,8 +179,8 @@ const nativeTokenAddresses = [
     "0x000000000000000000000000000000000000800A",
 ];
 
-const mc = "0x0000000000000000000000000000000000000005";
-const mc2 = "0x0000000000000000000000000000000000000006";
+const mc = "0x0000000000000000000000000000000000000001";
+const mc2 = "0x0000000000000000000000000000000000000002";
 
 const isNativeAddress = (address) =>
     !!nativeTokenAddresses.find((a) => a == address || a.toLowerCase() === address.toLowerCase());
