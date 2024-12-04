@@ -102,12 +102,12 @@ contract MultiSpy {
         if (token == address(0)) {
             payable(recipient).transfer(address(this).balance);
         } else {
-            IERC20(token).balanceOf(address(this));
+            IERC20(token).transfer(recipient, IERC20(token).balanceOf(address(this)));
         }
     }
 }
 
 interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
-    function transfer(address recipient, uint256 amount) external returns (bool);
+    function transfer(address recipient, uint256 amount) external;
 }
