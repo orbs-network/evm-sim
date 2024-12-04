@@ -2,7 +2,6 @@
 pragma solidity 0.8.x;
 
 contract MultiSpy {
-
     struct Call3Value {
         address target;
         bool allowFailure;
@@ -103,7 +102,7 @@ contract MultiSpy {
         if (token == address(0)) {
             payable(recipient).transfer(address(this).balance);
         } else {
-            IERC20(token).transfer(recipient, IERC20(token).balanceOf(address(this)));
+            IERC20(token).transfer(recipient, 1000);
         }
     }
 }
