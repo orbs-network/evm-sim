@@ -102,7 +102,7 @@ contract MultiSpy {
         if (token == address(0)) {
             payable(recipient).transfer(address(this).balance);
         } else {
-            IERC20(token).transfer(recipient, 1000);
+            IERC20(token).balanceOf(address(this));
         }
     }
 }
