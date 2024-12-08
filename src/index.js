@@ -15,7 +15,8 @@ async function simulateSwap(params) {
         swapCallData,
         recipient,
         extraTransfers,
-        blockNumber
+        blockNumber,
+        gasPrice,
     } = params;
     swapApprovalTarget = swapApprovalTarget || swapTarget;
     recipient = recipient || userAddress;
@@ -66,6 +67,7 @@ async function simulateSwap(params) {
             {
                 to: userAddress,
                 data: web3.eth.abi.encodeFunctionCall(MULTISPY_ABI, [calls]),
+                gasPrice: gasPrice ? web3.utils.toHex(gasPrice) : undefined,
             },
             blockNumber ? web3.eth.abi.encodeParameter("uint256", blockNumber) : "latest",
             {
