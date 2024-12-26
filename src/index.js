@@ -21,6 +21,7 @@ async function simulateSwap(params) {
     swapApprovalTarget = swapApprovalTarget || swapTarget;
     recipient = recipient || userAddress;
     extraTransfers = extraTransfers || 0;
+    outToken = isNativeAddress(outToken) ? nativeTokenAddresses[0] : outToken;
 
     try {
         if (!web3) throw new Error("missing web3")
