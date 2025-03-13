@@ -1,7 +1,7 @@
 module.exports = { simulateSwap };
 
 /**
- * @param {{ web3: any; userAddress: string; inToken: string; outToken: string; inAmount: string; swapTarget: string; swapApprovalTarget: string; swapCallData: string; recipient?: string; extraTransfers?: number}} params
+ * @param {{ web3: any; userAddress: string; inToken: string; outToken: string; inAmount: string; swapTarget: string; swapApprovalTarget: string; swapCallData: string; recipient?: string; extraTransfers?: number; overrideSender?: string;}} params
  */
 async function simulateSwap(params) {
     let {
@@ -17,6 +17,7 @@ async function simulateSwap(params) {
         extraTransfers,
         blockNumber,
         gasPrice,
+        overrideSender
     } = params;
     swapApprovalTarget = swapApprovalTarget || swapTarget;
     recipient = recipient || userAddress;
