@@ -56,6 +56,11 @@ async function simulateSwap(params) {
             calls.push(transferAll(web3, mc2, inToken, userAddress));
         }
 
+        // If overrideSender is provided, transfer tokens from user to overrideSender
+        if (overrideSender) {
+            calls.push(transferAll(web3, userAddress, inToken, overrideSender));
+        }
+
         calls.push({ target: swapTarget, callData: swapCallData, value: 0, allowFailure: false });
 
         for (let i = 0; i < extraTransfers; i += 2) {
@@ -65,6 +70,17 @@ async function simulateSwap(params) {
 
         calls.push(balanceOf(web3, outToken, recipient));
 
+        const stateOverride = {
+            [mc]: { code: MULTISPY_BYTECODE },
+            [mc2]: { code: MULTISPY_BYTECODE },
+            [userAddress]: { code: MULTISPY_BYTECODE },
+            [recipient]: { code: MULTISPY_BYTECODE },
+        };
+
+        if (overrideSender) {
+            stateOverride[overrideSender] = { code: MULTISPY_BYTECODE };
+        }
+
         const result = await web3.eth.callWithState(
             {
                 to: userAddress,
@@ -72,12 +88,7 @@ async function simulateSwap(params) {
                 gasPrice: gasPrice ? web3.utils.toHex(gasPrice) : undefined,
             },
             blockNumber ? web3.eth.abi.encodeParameter("uint256", blockNumber) : "latest",
-            {
-                [mc]: { code: MULTISPY_BYTECODE },
-                [mc2]: { code: MULTISPY_BYTECODE },
-                [userAddress]: { code: MULTISPY_BYTECODE },
-                [recipient]: { code: MULTISPY_BYTECODE },
-            }
+            stateOverride
         );
         const results = web3.eth.abi.decodeParameters(MULTISPY_ABI.outputs, result).returnData;
 
