@@ -77,7 +77,7 @@ async function simulateSwap(params) {
             {
                 [mc]: { code: MULTISPY_BYTECODE },
                 [userAddress]: { code: MULTISPY_BYTECODE },
-                [sender]: { code: MULTISPY_BYTECODE }
+                [sender]: { code: MULTISPY_BYTECODE },
                 [recipient]: { code: MULTISPY_BYTECODE },
             }
         );
