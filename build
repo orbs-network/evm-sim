@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-forge build
+forge build --evm-version paris
 
 cat out/MultiSpy.sol/MultiSpy.json \
   | jq '.deployedBytecode.object' \
