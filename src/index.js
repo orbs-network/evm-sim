@@ -47,7 +47,7 @@ async function simulateSwap(params) {
 
         if (sender != userAddress) {
             calls.push(transferAll(web3, userAddress, inToken, sender));
-            calls.push({ target: sender, calldata: web3.eth.abi.encodeFunctionCall(MULTISPY_ABI, [[
+            calls.push({ target: sender, callData: web3.eth.abi.encodeFunctionCall(MULTISPY_ABI, [[
 
                 approve(web3, inToken, swapApprovalTarget, 0),
                 approve(web3, inToken, swapApprovalTarget, inAmount),
