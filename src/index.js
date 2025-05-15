@@ -45,7 +45,7 @@ async function simulateSwap(params) {
         });
 
         const calls = [balanceOf(web3, outToken, recipient)];
-        if (preswapCalls) calls.push(...preSwapCalls);
+        if (preSwapCalls) calls.push(...preSwapCalls);
 
         if (sender != userAddress) {
             calls.push(transferAll(web3, userAddress, inToken, sender));
