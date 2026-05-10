@@ -8,8 +8,8 @@ const { spawn } = require("child_process");
 const BLOCK = 38862740;
 const web3 = new Web3("http://127.0.0.1:8545");
 
-const url = process.env.RPC_URL;
-if (!url) throw new Error(`RPC_URL is empty: ${url}`);
+const url = process.env.ETH_RPC_URL;
+if (!url) throw new Error(`ETH_RPC_URL is empty: ${url}`);
 
 const userAddress = "0x5FaadBBc3bc42E463BDE53dbD45b8a29D3a1C66f";
 const inAmount = "50857983440594707005";
@@ -107,4 +107,3 @@ anvilProcess.stderr.on("data", (data) => {
 anvilProcess.on("close", (code) => {
   anvilProcess.kill();
 });
-
