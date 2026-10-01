@@ -1,4 +1,4 @@
-module github.com/orbs-network/tx-simulator
+module github.com/orbs-network/evm-sim
 
 go 1.24.0
 
