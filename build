@@ -1,16 +1,9 @@
-#!/bin/bash
-
+#!/bin/zsh
 set -euo pipefail
-
-forge build --evm-version paris
-
-cat out/MultiSpy.sol/MultiSpy.json \
-  | jq '.deployedBytecode.object' \
-  | parallel sed "-i '' 's@const MULTISPY_BYTECODE = .*@const MULTISPY_BYTECODE = \"{}\";@' src/index.js"
-
-cat out/MultiSpy.sol/MultiSpy.json \
-  | jq -c '.abi[] | select(.name == "aggregate3Value") | @json' \
-  | parallel sed "-i '' 's@const MULTISPY_ABI = .*@const MULTISPY_ABI = {};@' src/index.js"
-
-npx javascript-obfuscator src/index.js --output dist/index.js
-
+cd "${0:A:h}"
+build_dir=$(mktemp -d)
+trap 'rm -rf "$build_dir"' EXIT
+forge build --out "$build_dir"
+jq '{abi, runtime: .deployedBytecode.object}' "$build_dir/Simulator.sol/Simulator.json" > artifact/simulator.json
+jq '{abi, runtime: .deployedBytecode.object}' "$build_dir/Simulator.t.sol/Token.json" > test/token.json
+jq '{abi, runtime: .deployedBytecode.object}' "$build_dir/Simulator.t.sol/Router.json" > test/router.json
