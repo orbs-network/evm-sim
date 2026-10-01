@@ -1,6 +1,7 @@
-# evm-sim
+# 🧪 evm-sim
 
-🧪 Simulate ERC20 transfers, swaps, and ordered EVM calls in Go.
+Simulate ERC20 transfers, swaps, and ordered EVM calls in Go. Returns balance
+deltas without sending transactions.
 
 ## 📦 Install
 
@@ -8,35 +9,34 @@
 go get github.com/orbs-network/evm-sim@v1.5.2
 ```
 
-Requires Go 1.24+ and an Ethereum RPC supporting state overrides. The compiled
-contract is included; Node.js and a local Solidity compiler are not required.
+Requires Go 1.24+ and an Ethereum RPC supporting state overrides. Contract included.
 
-## ⌨️ Usage
+## ⚡ Usage
 
 ```go
-package example
+import simulator "github.com/orbs-network/evm-sim"
 
-import (
-    "context"
-    "math/big"
-
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/ethereum/go-ethereum/ethclient"
-    simulator "github.com/orbs-network/evm-sim"
-)
-
-func received(ctx context.Context, client *ethclient.Client,
-    token, sender, receiver common.Address, amount *big.Int,
-) (*big.Int, error) {
-    return simulator.SimulateTransfer(ctx, client.Client(), simulator.TransferRequest{
-        Token: token, From: sender, To: receiver, Amount: amount,
-    })
-}
+received, err := simulator.SimulateTransfer(ctx, client.Client(), simulator.TransferRequest{
+    Token: token, From: sender, To: receiver, Amount: amount,
+})
 ```
 
-## 🧭 Navigation
+The sender must approve the receiver first. `client` is an `ethclient.Client`.
 
-1. [Public API](docs/api.md)
-2. [Maintainer checks and artifact rebuild](docs/development.md)
-3. [Go implementation](simulator.go)
-4. [Solidity simulator](src/Simulator.sol)
+1. `SimulateTransfer` → receiver's ERC20 balance delta.
+2. `SimulateSwap` → swap results; `Deltas[0]` is the recipient's output delta.
+3. `Simulate` → ordered calls, balance deltas, return data, and gas.
+
+## 🛠️ Develop
+
+```sh
+go test ./...
+go build ./...
+go vet ./...
+forge test
+go test -tags integration -race ./...
+./build
+```
+
+Foundry is needed for Solidity checks and artifact rebuilds; integration tests
+use Anvil. Rebuilding also requires `jq`.
